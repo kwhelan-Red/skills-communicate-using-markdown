@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance Audit Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 25px 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #1e3c72;
+        }
+
+        .btn-primary:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .stat-card.total { border-left-color: #3498db; }
+        .stat-card.compliant { border-left-color: #27ae60; }
+        .stat-card.non-compliant { border-left-color: #e74c3c; }
+        .stat-card.in-progress { border-left-color: #f39c12; }
+        .stat-card.pending { border-left-color: #95a5a6; }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .stat-change {
+            font-size: 0.85em;
+            margin-top: 8px;
+            color: #7f8c8d;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .section-content {
+            padding: 30px;
+        }
+
+        .control-item {
+            background: #f8f9fa;
+            border-left: 4px solid #bdc3c7;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .control-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .control-item.compliant { border-left-color: #27ae60; background: #d5f4e6; }
+        .control-item.non-compliant { border-left-color: #e74c3c; background: #fadbd8; }
+        .control-item.in-progress { border-left-color: #f39c12; background: #fdebd0; }
+        .control-item.pending { border-left-color: #95a5a6; }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .control-id {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .control-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .control-status.pending {
+            background: #ecf0f1;
+            color: #7f8c8d;
+        }
+
+        .control-status.in-progress {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .control-status.compliant {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .control-status.non-compliant {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .control-description {
+            color: #34495e;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .control-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .detail-item {
+            font-size: 0.9em;
+        }
+
+        .detail-label {
+            color: #7f8c8d;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            color: #2c3e50;
+        }
+
+        .evidence-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .evidence-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .evidence-tag {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85em;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-add-evidence {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-add-evidence:hover {
+            background: #2980b9;
+        }
+
+        .filter-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9em;
+            background: white;
+            cursor: pointer;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-family: inherit;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
+            height: 100%;
+            transition: width 0.3s;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .control-header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span>🛡️</span>
+                <span>Compliance Audit Management</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="exportData()">📥 Export Data</button>
+                <button class="btn btn-secondary" onclick="importPredefinedControls()">📋 Import Controls</button>
+                <button class="btn btn-secondary" onclick="clearAllControls()" style="background: #e74c3c; color: white;">🗑️ Clear All</button>
+                <button class="btn btn-primary" onclick="openAddControlModal()">+ Add Control</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="dashboard">
+            <div class="stat-card total">
+                <div class="stat-label">Total Controls</div>
+                <div class="stat-value" id="totalControls">0</div>
+                <div class="stat-change">All audit controls</div>
+            </div>
+            <div class="stat-card compliant">
+                <div class="stat-label">Compliant</div>
+                <div class="stat-value" id="compliantControls">0</div>
+                <div class="stat-change" id="compliantPercent">0%</div>
+            </div>
+            <div class="stat-card non-compliant">
+                <div class="stat-label">Non-Compliant</div>
+                <div class="stat-value" id="nonCompliantControls">0</div>
+                <div class="stat-change" id="nonCompliantPercent">0%</div>
+            </div>
+            <div class="stat-card in-progress">
+                <div class="stat-label">In Progress</div>
+                <div class="stat-value" id="inProgressControls">0</div>
+                <div class="stat-change" id="inProgressPercent">0%</div>
+            </div>
+            <div class="stat-card pending">
+                <div class="stat-label">Pending Review</div>
+                <div class="stat-value" id="pendingControls">0</div>
+                <div class="stat-change" id="pendingPercent">0%</div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filter-item">
+                <label>Status:</label>
+                <select class="filter-select" id="statusFilter" onchange="filterControls()">
+                    <option value="all">All Status</option>
+                    <option value="compliant">Compliant</option>
+                    <option value="non-compliant">Non-Compliant</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="pending">Pending</option>
+                </select>
+            </div>
+                <div class="filter-item">
+                    <label>Category:</label>
+                    <select class="filter-select" id="categoryFilter" onchange="filterControls()">
+                        <option value="all">All Categories</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>Business Unit:</label>
+                    <select class="filter-select" id="businessUnitFilter" onchange="filterControls()">
+                        <option value="all">All Business Units</option>
+                    </select>
+                </div>
+                <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search controls..." onkeyup="filterControls()">
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    <span>📋</span>
+                    <span>Control Inventory</span>
+                </div>
+                <div class="section-actions">
+                    <button class="btn btn-secondary" onclick="expandAll()">Expand All</button>
+                    <button class="btn btn-secondary" onclick="collapseAll()">Collapse All</button>
+                </div>
+            </div>
+            <div class="section-content">
+                <div id="controlsContainer">
+                    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                        <p>No controls added yet. Click "Add Control" to get started.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Control Modal -->
+    <div class="modal" id="addControlModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Add New Control</div>
+                <button class="close-btn" onclick="closeModal('addControlModal')">&times;</button>
+            </div>
+            <form id="addControlForm" onsubmit="addControl(event)">
+                <div class="form-group">
+                    <label class="form-label">Control ID *</label>
+                    <input type="text" class="form-input" id="controlId" required placeholder="e.g., CTRL-001">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Control Name *</label>
+                    <input type="text" class="form-input" id="controlName" required placeholder="e.g., Access Control Management">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Business Unit *</label>
+                    <select class="form-select" id="controlBusinessUnit" required>
+                        <option value="">Select Business Unit</option>
+                        <option value="Secure Flow">Secure Flow</option>
+                        <option value="PSIRT">PSIRT</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category *</label>
+                    <select class="form-select" id="controlCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="Access Control">Access Control</option>
+                        <option value="Data Protection">Data Protection</option>
+                        <option value="Network Security">Network Security</option>
+                        <option value="Incident Response">Incident Response</option>
+                        <option value="Business Continuity">Business Continuity</option>
+                        <option value="Risk Management">Risk Management</option>
+                        <option value="Compliance">Compliance</option>
+                        <option value="Physical Security">Physical Security</option>
+                        <option value="Vendor Management">Vendor Management</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description *</label>
+                    <textarea class="form-textarea" id="controlDescription" required placeholder="Describe the control and its purpose..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Owner *</label>
+                    <select class="form-select" id="controlOwner" required>
+                        <option value="">Select Owner</option>
+                        <option value="Kieran Whelan">Kieran Whelan</option>
+                        <option value="Jen Comansky">Jen Comansky</option>
+                        <option value="Pranshul Srivastava">Pranshul Srivastava</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status *</label>
+                    <select class="form-select" id="controlStatus" required>
+                        <option value="pending">Pending Review</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="compliant">Compliant</option>
+                        <option value="non-compliant">Non-Compliant</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Due Date</label>
+                    <input type="date" class="form-input" id="controlDueDate">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-textarea" id="controlNotes" placeholder="Additional notes or observations..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Helpful Links</label>
+                    <div style="font-size: 0.85em; color: #7f8c8d; margin-bottom: 10px;">Add useful links related to this control</div>
+                    <div id="linksContainer" style="margin-top: 10px;">
+                        <!-- Links will be added here dynamically -->
+                    </div>
+                    <button type="button" class="btn-small btn-add-evidence" onclick="addLink('addControlModal')" style="margin-top: 10px;">+ Add Link</button>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Questions & Answers</label>
+                    <div id="questionsContainer" style="margin-top: 10px;">
+                        <!-- Questions will be added here dynamically -->
+                    </div>
+                    <button type="button" class="btn-small btn-add-evidence" onclick="addQuestion('addControlModal')" style="margin-top: 10px;">+ Add Question</button>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addControlModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Control</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Control Modal -->
+    <div class="modal" id="editControlModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Edit Control</div>
+                <button class="close-btn" onclick="closeModal('editControlModal')">&times;</button>
+            </div>
+            <form id="editControlForm" onsubmit="updateControl(event)">
+                <input type="hidden" id="editControlIndex">
+                <div class="form-group">
+                    <label class="form-label">Control ID *</label>
+                    <input type="text" class="form-input" id="editControlId" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Control Name *</label>
+                    <input type="text" class="form-input" id="editControlName" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Business Unit *</label>
+                    <select class="form-select" id="editControlBusinessUnit" required>
+                        <option value="Secure Flow">Secure Flow</option>
+                        <option value="PSIRT">PSIRT</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category *</label>
+                    <select class="form-select" id="editControlCategory" required>
+                        <option value="Access Control">Access Control</option>
+                        <option value="Data Protection">Data Protection</option>
+                        <option value="Network Security">Network Security</option>
+                        <option value="Incident Response">Incident Response</option>
+                        <option value="Business Continuity">Business Continuity</option>
+                        <option value="Risk Management">Risk Management</option>
+                        <option value="Compliance">Compliance</option>
+                        <option value="Physical Security">Physical Security</option>
+                        <option value="Vendor Management">Vendor Management</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description *</label>
+                    <textarea class="form-textarea" id="editControlDescription" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Owner *</label>
+                    <select class="form-select" id="editControlOwner" required>
+                        <option value="">Select Owner</option>
+                        <option value="Kieran Whelan">Kieran Whelan</option>
+                        <option value="Jen Comansky">Jen Comansky</option>
+                        <option value="Pranshul Srivastava">Pranshul Srivastava</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status *</label>
+                    <select class="form-select" id="editControlStatus" required>
+                        <option value="pending">Pending Review</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="compliant">Compliant</option>
+                        <option value="non-compliant">Non-Compliant</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Due Date</label>
+                    <input type="date" class="form-input" id="editControlDueDate">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-textarea" id="editControlNotes"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Helpful Links</label>
+                    <div style="font-size: 0.85em; color: #7f8c8d; margin-bottom: 10px;">Add useful links related to this control</div>
+                    <div id="editLinksContainer" style="margin-top: 10px;">
+                        <!-- Links will be added here dynamically -->
+                    </div>
+                    <button type="button" class="btn-small btn-add-evidence" onclick="addLink('editControlModal')" style="margin-top: 10px;">+ Add Link</button>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Questions & Answers *</label>
+                    <div style="font-size: 0.85em; color: #7f8c8d; margin-bottom: 10px;">Add questions that must be answered for this control</div>
+                    <div id="editQuestionsContainer" style="margin-top: 10px;">
+                        <!-- Questions will be added here dynamically -->
+                    </div>
+                    <button type="button" class="btn-small btn-add-evidence" onclick="addQuestion('editControlModal')" style="margin-top: 10px;">+ Add Question</button>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editControlModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Control</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let controls = [];
+        let filteredControls = [];
+
+        // Load controls from localStorage on page load
+        function loadControls() {
+            const saved = localStorage.getItem('auditControls');
+            if (saved) {
+                controls = JSON.parse(saved);
+            }
+            updateDashboard();
+            renderControls();
+            updateCategoryFilter();
+        }
+
+        // Save controls to localStorage
+        function saveControls() {
+            localStorage.setItem('auditControls', JSON.stringify(controls));
+            updateDashboard();
+        }
+
+        // Update dashboard statistics
+        function updateDashboard() {
+            const total = controls.length;
+            const compliant = controls.filter(c => c.status === 'compliant').length;
+            const nonCompliant = controls.filter(c => c.status === 'non-compliant').length;
+            const inProgress = controls.filter(c => c.status === 'in-progress').length;
+            const pending = controls.filter(c => c.status === 'pending').length;
+
+            document.getElementById('totalControls').textContent = total;
+            document.getElementById('compliantControls').textContent = compliant;
+            document.getElementById('nonCompliantControls').textContent = nonCompliant;
+            document.getElementById('inProgressControls').textContent = inProgress;
+            document.getElementById('pendingControls').textContent = pending;
+
+            document.getElementById('compliantPercent').textContent = total > 0 ? Math.round((compliant/total)*100) + '%' : '0%';
+            document.getElementById('nonCompliantPercent').textContent = total > 0 ? Math.round((nonCompliant/total)*100) + '%' : '0%';
+            document.getElementById('inProgressPercent').textContent = total > 0 ? Math.round((inProgress/total)*100) + '%' : '0%';
+            document.getElementById('pendingPercent').textContent = total > 0 ? Math.round((pending/total)*100) + '%' : '0%';
+        }
+
+        // Update category filter dropdown
+        function updateCategoryFilter() {
+            const categories = [...new Set(controls.map(c => c.category))].sort();
+            const select = document.getElementById('categoryFilter');
+            const currentValue = select.value;
+            
+            // Keep "All Categories" option
+            select.innerHTML = '<option value="all">All Categories</option>';
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                select.appendChild(option);
+            });
+            
+            if (currentValue && categories.includes(currentValue)) {
+                select.value = currentValue;
+            }
+
+            // Update business unit filter
+            const businessUnits = [...new Set(controls.map(c => c.businessUnit || 'Other'))].sort();
+            const buSelect = document.getElementById('businessUnitFilter');
+            const currentBUValue = buSelect.value;
+            
+            buSelect.innerHTML = '<option value="all">All Business Units</option>';
+            businessUnits.forEach(bu => {
+                const option = document.createElement('option');
+                option.value = bu;
+                option.textContent = bu;
+                buSelect.appendChild(option);
+            });
+            
+            if (currentBUValue && businessUnits.includes(currentBUValue)) {
+                buSelect.value = currentBUValue;
+            }
+        }
+
+        // Render controls
+        function renderControls() {
+            const container = document.getElementById('controlsContainer');
+            
+            if (filteredControls.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7f8c8d;"><p>No controls match your filters.</p></div>';
+                return;
+            }
+
+            let html = '';
+            filteredControls.forEach((control, index) => {
+                const statusClass = control.status;
+                const dueDate = control.dueDate ? new Date(control.dueDate).toLocaleDateString() : 'Not set';
+                const isOverdue = control.dueDate && new Date(control.dueDate) < new Date() && control.status !== 'compliant';
+                
+                html += `<div class="control-item ${statusClass}" data-index="${index}">`;
+                html += `<div class="control-header">`;
+                html += `<div>`;
+                html += `<div class="control-id">${escapeHtml(control.id)} - ${escapeHtml(control.name)}</div>`;
+                html += `</div>`;
+                html += `<div style="display: flex; gap: 10px; align-items: center;">`;
+                html += `<span class="control-status ${statusClass}" onclick="changeStatus(${index})">${control.status.replace('-', ' ')}</span>`;
+                html += `<button class="btn-small" style="background: #3498db; color: white;" onclick="editControl(${index})">Edit</button>`;
+                html += `<button class="btn-small" style="background: #e74c3c; color: white;" onclick="deleteControl(${index})">Delete</button>`;
+                html += `</div>`;
+                html += `</div>`;
+                html += `<div class="control-description">${escapeHtml(control.description)}</div>`;
+                html += `<div class="control-details">`;
+                html += `<div class="detail-item">`;
+                html += `<div class="detail-label">Business Unit</div>`;
+                html += `<div class="detail-value">${escapeHtml(control.businessUnit || 'Other')}</div>`;
+                html += `</div>`;
+                html += `<div class="detail-item">`;
+                html += `<div class="detail-label">Category</div>`;
+                html += `<div class="detail-value">${escapeHtml(control.category)}</div>`;
+                html += `</div>`;
+                html += `<div class="detail-item">`;
+                html += `<div class="detail-label">Owner</div>`;
+                html += `<div class="detail-value">${escapeHtml(control.owner)}</div>`;
+                html += `</div>`;
+                html += `<div class="detail-item">`;
+                html += `<div class="detail-label">Due Date</div>`;
+                html += `<div class="detail-value" style="${isOverdue ? 'color: #e74c3c; font-weight: 600;' : ''}">${dueDate} ${isOverdue ? '⚠️ Overdue' : ''}</div>`;
+                html += `</div>`;
+                html += `</div>`;
+                if (control.notes) {
+                    html += `<div class="evidence-section">`;
+                    html += `<div class="detail-label">Notes</div>`;
+                    html += `<div class="detail-value" style="margin-top: 5px;">${escapeHtml(control.notes)}</div>`;
+                    html += `</div>`;
+                }
+
+                // Helpful Links section
+                if (control.links && control.links.length > 0) {
+                    html += `<div class="evidence-section">`;
+                    html += `<div class="detail-label" style="margin-bottom: 10px; font-size: 1.1em;">Helpful Links</div>`;
+                    html += `<div style="display: flex; flex-wrap: wrap; gap: 10px;">`;
+                    control.links.forEach(link => {
+                        const linkText = link.label || link.url;
+                        html += `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #3498db; color: white; text-decoration: none; border-radius: 6px; font-size: 0.9em; transition: all 0.3s;">`;
+                        html += `<span>🔗</span>`;
+                        html += `<span>${escapeHtml(linkText)}</span>`;
+                        html += `</a>`;
+                    });
+                    html += `</div>`;
+                    html += `</div>`;
+                }
+
+                // Questions and Answers section
+                if (control.questions && control.questions.length > 0) {
+                    html += `<div class="evidence-section">`;
+                    html += `<div class="detail-label" style="margin-bottom: 15px; font-size: 1.1em;">Questions & Answers</div>`;
+                    control.questions.forEach((qa, qaIndex) => {
+                        const hasAnswer = qa.answer && qa.answer.trim() !== '';
+                        html += `<div style="background: ${hasAnswer ? '#d5f4e6' : '#fff3cd'}; padding: 15px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid ${hasAnswer ? '#27ae60' : '#f39c12'};">`;
+                        html += `<div style="font-weight: 600; margin-bottom: 8px; color: #2c3e50;">Q${qaIndex + 1}: ${escapeHtml(qa.question)}</div>`;
+                        html += `<div style="margin-top: 8px;">`;
+                        html += `<div style="font-weight: 600; font-size: 0.9em; color: #7f8c8d; margin-bottom: 5px;">Answer:</div>`;
+                        if (hasAnswer) {
+                            html += `<div style="color: #2c3e50; padding: 8px; background: white; border-radius: 4px; margin-bottom: 10px;">
+                                <strong>${escapeHtml(qa.answer)}</strong>
+                            </div>`;
+                            
+                            // Display justification if it exists
+                            if (qa.justification && qa.justification.trim()) {
+                                html += `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0;">`;
+                                html += `<div style="font-weight: 600; font-size: 0.85em; color: #7f8c8d; margin-bottom: 8px;">Justification:</div>`;
+                                html += `<div style="color: #2c3e50; padding: 10px; background: #f8f9fa; border-radius: 4px; line-height: 1.6; white-space: pre-wrap;">${escapeHtml(qa.justification)}</div>`;
+                                html += `</div>`;
+                            }
+                            
+                            // Display answer links if they exist
+                            if (qa.links && qa.links.length > 0) {
+                                html += `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0;">`;
+                                html += `<div style="font-weight: 600; font-size: 0.85em; color: #7f8c8d; margin-bottom: 8px;">Supporting Links:</div>`;
+                                html += `<div style="display: flex; flex-wrap: wrap; gap: 8px;">`;
+                                qa.links.forEach(link => {
+                                    html += `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 0.85em;">`;
+                                    html += `<span>🔗</span>`;
+                                    html += `<span>${escapeHtml(link.label || link.url)}</span>`;
+                                    html += `</a>`;
+                                });
+                                html += `</div>`;
+                                html += `</div>`;
+                            }
+                        } else {
+                            html += `<div style="color: #e74c3c; font-style: italic;">⚠️ Answer required</div>`;
+                        }
+                        html += `</div>`;
+                        html += `</div>`;
+                    });
+                    html += `</div>`;
+                }
+                html += `</div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Filter controls
+        function filterControls() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const businessUnitFilter = document.getElementById('businessUnitFilter').value;
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+
+            filteredControls = controls.filter(control => {
+                const statusMatch = statusFilter === 'all' || control.status === statusFilter;
+                const categoryMatch = categoryFilter === 'all' || control.category === categoryFilter;
+                const businessUnitMatch = businessUnitFilter === 'all' || (control.businessUnit || 'Other') === businessUnitFilter;
+                const searchMatch = !searchTerm || 
+                    control.id.toLowerCase().includes(searchTerm) ||
+                    control.name.toLowerCase().includes(searchTerm) ||
+                    control.description.toLowerCase().includes(searchTerm) ||
+                    control.owner.toLowerCase().includes(searchTerm);
+                
+                return statusMatch && categoryMatch && businessUnitMatch && searchMatch;
+            });
+
+            renderControls();
+        }
+
+        // Pre-populated answer options
+        const answerOptions = [
+            "Yes",
+            "No",
+            "Partially Compliant",
+            "Not Applicable",
+            "In Progress",
+            "Under Review",
+            "Requires Remediation",
+            "Compliant",
+            "Non-Compliant"
+        ];
+
+        // Add question to form
+        let questionCounter = 0;
+        function addQuestion(modalType) {
+            const container = modalType === 'addControlModal' 
+                ? document.getElementById('questionsContainer')
+                : document.getElementById('editQuestionsContainer');
+            
+            const questionIndex = questionCounter++;
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-item-form';
+            questionDiv.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid #3498db;';
+            
+            // Build answer options HTML
+            let answerOptionsHTML = '<option value="">Select Answer *</option>';
+            answerOptions.forEach(option => {
+                answerOptionsHTML += `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`;
+            });
+            
+            questionDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-weight: 600; color: #2c3e50;">Question ${questionIndex + 1}</div>
+                    <button type="button" class="btn-small" style="background: #e74c3c; color: white;" onclick="removeQuestion(this)">Remove</button>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9em;">Question *</label>
+                    <input type="text" class="form-input question-input" placeholder="Enter question..." required style="width: 100%;">
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9em;">Answer *</label>
+                    <select class="form-select answer-select" required style="width: 100%;">
+                        ${answerOptionsHTML}
+                    </select>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9em;">Justification</label>
+                    <textarea class="form-textarea answer-justification" placeholder="Provide justification for your answer..." style="width: 100%; min-height: 80px; resize: vertical;"></textarea>
+                </div>
+                <div class="answer-links-section" style="margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label style="font-weight: 600; font-size: 0.9em; color: #2c3e50;">Supporting Links</label>
+                        <button type="button" class="btn-small" style="background: #27ae60; color: white; font-size: 0.8em; padding: 4px 8px;" onclick="addAnswerLink(this)">+ Add Link</button>
+                    </div>
+                    <div class="answer-links-container" style="margin-top: 8px;">
+                        <!-- Links will be added here -->
+                    </div>
+                </div>
+            `;
+            container.appendChild(questionDiv);
+        }
+
+        function addAnswerLink(button) {
+            const linksContainer = button.parentElement.nextElementSibling;
+            const linkDiv = document.createElement('div');
+            linkDiv.className = 'answer-link-item';
+            linkDiv.style.cssText = 'display: flex; gap: 8px; margin-bottom: 8px; align-items: center;';
+            linkDiv.innerHTML = `
+                <input type="text" class="form-input answer-link-label" placeholder="Link label" style="flex: 1; padding: 6px; font-size: 0.9em;">
+                <input type="url" class="form-input answer-link-url" placeholder="https://..." style="flex: 2; padding: 6px; font-size: 0.9em;">
+                <button type="button" class="btn-small" style="background: #e74c3c; color: white; font-size: 0.8em; padding: 4px 8px;" onclick="removeAnswerLink(this)">Remove</button>
+            `;
+            linksContainer.appendChild(linkDiv);
+        }
+
+        function removeAnswerLink(button) {
+            button.closest('.answer-link-item').remove();
+        }
+
+        function removeQuestion(button) {
+            if (confirm('Remove this question?')) {
+                button.closest('.question-item-form').remove();
+                // Renumber questions
+                const container = button.closest('[id$="QuestionsContainer"]');
+                const questions = container.querySelectorAll('.question-item-form');
+                questions.forEach((q, index) => {
+                    q.querySelector('div > div').textContent = `Question ${index + 1}`;
+                });
+            }
+        }
+
+        // Add link to form
+        let linkCounter = 0;
+        function addLink(modalType) {
+            const container = modalType === 'addControlModal' 
+                ? document.getElementById('linksContainer')
+                : document.getElementById('editLinksContainer');
+            
+            const linkIndex = linkCounter++;
+            const linkDiv = document.createElement('div');
+            linkDiv.className = 'link-item-form';
+            linkDiv.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid #3498db;';
+            linkDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-weight: 600; color: #2c3e50;">Link ${linkIndex + 1}</div>
+                    <button type="button" class="btn-small" style="background: #e74c3c; color: white;" onclick="removeLink(this)">Remove</button>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9em;">Link Label *</label>
+                    <input type="text" class="form-input link-label-input" placeholder="e.g., Policy Document, Reference Guide..." required style="width: 100%;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9em;">URL *</label>
+                    <input type="url" class="form-input link-url-input" placeholder="https://..." required style="width: 100%;">
+                </div>
+            `;
+            container.appendChild(linkDiv);
+        }
+
+        function removeLink(button) {
+            if (confirm('Remove this link?')) {
+                button.closest('.link-item-form').remove();
+                // Renumber links
+                const container = button.closest('[id$="LinksContainer"]');
+                const links = container.querySelectorAll('.link-item-form');
+                links.forEach((l, index) => {
+                    l.querySelector('div > div').textContent = `Link ${index + 1}`;
+                });
+            }
+        }
+
+        // Add control
+        function addControl(event) {
+            event.preventDefault();
+            
+            // Collect links
+            const links = [];
+            const linkItems = document.querySelectorAll('#linksContainer .link-item-form');
+            linkItems.forEach(item => {
+                const label = item.querySelector('.link-label-input').value.trim();
+                const url = item.querySelector('.link-url-input').value.trim();
+                if (label && url) {
+                    // Validate URL
+                    try {
+                        new URL(url);
+                        links.push({ label, url });
+                    } catch (e) {
+                        alert('Invalid URL: ' + url);
+                        return;
+                    }
+                } else if (label || url) {
+                    alert('Both label and URL are required for links.');
+                    return;
+                }
+            });
+            
+            // Collect questions and answers
+            const questions = [];
+            const questionItems = document.querySelectorAll('#questionsContainer .question-item-form');
+            questionItems.forEach(item => {
+                const question = item.querySelector('.question-input').value.trim();
+                const answer = item.querySelector('.answer-select').value.trim();
+                const justification = item.querySelector('.answer-justification') ? item.querySelector('.answer-justification').value.trim() : '';
+                if (question) {
+                    if (!answer) {
+                        alert('All questions must have answers. Please select an answer for: ' + question);
+                        return;
+                    }
+                    
+                    // Collect links for this answer
+                    const links = [];
+                    const linkItems = item.querySelectorAll('.answer-link-item');
+                    linkItems.forEach(linkItem => {
+                        const label = linkItem.querySelector('.answer-link-label').value.trim();
+                        const url = linkItem.querySelector('.answer-link-url').value.trim();
+                        if (label && url) {
+                            try {
+                                new URL(url);
+                                links.push({ label, url });
+                            } catch (e) {
+                                alert('Invalid URL: ' + url);
+                                return;
+                            }
+                        } else if (label || url) {
+                            alert('Both label and URL are required for answer links.');
+                            return;
+                        }
+                    });
+                    
+                    questions.push({ question, answer, justification, links });
+                }
+            });
+
+            if (questions.length === 0) {
+                if (!confirm('No questions added. Continue without questions?')) {
+                    return;
+                }
+            }
+            
+            const control = {
+                id: document.getElementById('controlId').value,
+                name: document.getElementById('controlName').value,
+                businessUnit: document.getElementById('controlBusinessUnit').value,
+                category: document.getElementById('controlCategory').value,
+                description: document.getElementById('controlDescription').value,
+                owner: document.getElementById('controlOwner').value,
+                status: document.getElementById('controlStatus').value,
+                dueDate: document.getElementById('controlDueDate').value || null,
+                notes: document.getElementById('controlNotes').value || '',
+                links: links,
+                questions: questions,
+                createdAt: new Date().toISOString()
+            };
+
+            controls.push(control);
+            saveControls();
+            updateCategoryFilter();
+            closeModal('addControlModal');
+            document.getElementById('addControlForm').reset();
+            document.getElementById('linksContainer').innerHTML = '';
+            document.getElementById('questionsContainer').innerHTML = '';
+            linkCounter = 0;
+            questionCounter = 0;
+            filterControls();
+        }
+
+        // Edit control
+        function editControl(index) {
+            const control = controls[index];
+            document.getElementById('editControlIndex').value = index;
+            document.getElementById('editControlId').value = control.id;
+            document.getElementById('editControlName').value = control.name;
+            document.getElementById('editControlBusinessUnit').value = control.businessUnit || 'Other';
+            document.getElementById('editControlCategory').value = control.category;
+            document.getElementById('editControlDescription').value = control.description;
+            document.getElementById('editControlOwner').value = control.owner;
+            document.getElementById('editControlStatus').value = control.status;
+            document.getElementById('editControlDueDate').value = control.dueDate || '';
+            document.getElementById('editControlNotes').value = control.notes || '';
+            
+            // Load links
+            const linksContainer = document.getElementById('editLinksContainer');
+            linksContainer.innerHTML = '';
+            linkCounter = 0;
+            
+            if (control.links && control.links.length > 0) {
+                control.links.forEach(link => {
+                    const linkDiv = document.createElement('div');
+                    linkDiv.className = 'link-item-form';
+                    linkDiv.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid #3498db;';
+                    const lIndex = linkCounter++;
+                    linkDiv.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div style="font-weight: 600; color: #2c3e50;">Link ${lIndex + 1}</div>
+                            <button type="button" class="btn-small" style="background: #e74c3c; color: white;" onclick="removeLink(this)">Remove</button>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9em;">Link Label *</label>
+                            <input type="text" class="form-input link-label-input" value="${escapeHtml(link.label || '')}" required style="width: 100%;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9em;">URL *</label>
+                            <input type="url" class="form-input link-url-input" value="${escapeHtml(link.url || '')}" required style="width: 100%;">
+                        </div>
+                    `;
+                    linksContainer.appendChild(linkDiv);
+                });
+            }
+            
+            // Load questions
+            const questionsContainer = document.getElementById('editQuestionsContainer');
+            questionsContainer.innerHTML = '';
+            questionCounter = 0;
+            
+            if (control.questions && control.questions.length > 0) {
+                control.questions.forEach(qa => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question-item-form';
+                    questionDiv.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid #3498db;';
+                    const qIndex = questionCounter++;
+                    
+                    // Build answer options HTML
+                    let answerOptionsHTML = '<option value="">Select Answer *</option>';
+                    answerOptions.forEach(option => {
+                        const selected = option === qa.answer ? 'selected' : '';
+                        answerOptionsHTML += `<option value="${escapeHtml(option)}" ${selected}>${escapeHtml(option)}</option>`;
+                    });
+                    
+                    // Build links HTML
+                    let linksHTML = '';
+                    if (qa.links && qa.links.length > 0) {
+                        qa.links.forEach(link => {
+                            linksHTML += `
+                                <div class="answer-link-item" style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center;">
+                                    <input type="text" class="form-input answer-link-label" value="${escapeHtml(link.label || '')}" placeholder="Link label" style="flex: 1; padding: 6px; font-size: 0.9em;">
+                                    <input type="url" class="form-input answer-link-url" value="${escapeHtml(link.url || '')}" placeholder="https://..." style="flex: 2; padding: 6px; font-size: 0.9em;">
+                                    <button type="button" class="btn-small" style="background: #e74c3c; color: white; font-size: 0.8em; padding: 4px 8px;" onclick="removeAnswerLink(this)">Remove</button>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    questionDiv.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div style="font-weight: 600; color: #2c3e50;">Question ${qIndex + 1}</div>
+                            <button type="button" class="btn-small" style="background: #e74c3c; color: white;" onclick="removeQuestion(this)">Remove</button>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9em;">Question *</label>
+                            <input type="text" class="form-input question-input" value="${escapeHtml(qa.question)}" required style="width: 100%;">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9em;">Answer *</label>
+                            <select class="form-select answer-select" required style="width: 100%;">
+                                ${answerOptionsHTML}
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9em;">Justification</label>
+                            <textarea class="form-textarea answer-justification" placeholder="Provide justification for your answer..." style="width: 100%; min-height: 80px; resize: vertical;">${escapeHtml(qa.justification || '')}</textarea>
+                        </div>
+                        <div class="answer-links-section" style="margin-top: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <label style="font-weight: 600; font-size: 0.9em; color: #2c3e50;">Supporting Links</label>
+                                <button type="button" class="btn-small" style="background: #27ae60; color: white; font-size: 0.8em; padding: 4px 8px;" onclick="addAnswerLink(this)">+ Add Link</button>
+                            </div>
+                            <div class="answer-links-container" style="margin-top: 8px;">
+                                ${linksHTML}
+                            </div>
+                        </div>
+                    `;
+                    questionsContainer.appendChild(questionDiv);
+                });
+            }
+            
+            openModal('editControlModal');
+        }
+
+        // Update control
+        function updateControl(event) {
+            event.preventDefault();
+            const index = parseInt(document.getElementById('editControlIndex').value);
+            
+            // Collect links
+            const links = [];
+            const linkItems = document.querySelectorAll('#editLinksContainer .link-item-form');
+            linkItems.forEach(item => {
+                const label = item.querySelector('.link-label-input').value.trim();
+                const url = item.querySelector('.link-url-input').value.trim();
+                if (label && url) {
+                    // Validate URL
+                    try {
+                        new URL(url);
+                        links.push({ label, url });
+                    } catch (e) {
+                        alert('Invalid URL: ' + url);
+                        return;
+                    }
+                } else if (label || url) {
+                    alert('Both label and URL are required for links.');
+                    return;
+                }
+            });
+            
+            // Collect questions and answers
+            const questions = [];
+            const questionItems = document.querySelectorAll('#editQuestionsContainer .question-item-form');
+            questionItems.forEach(item => {
+                const question = item.querySelector('.question-input').value.trim();
+                const answer = item.querySelector('.answer-select').value.trim();
+                const justification = item.querySelector('.answer-justification') ? item.querySelector('.answer-justification').value.trim() : '';
+                if (question) {
+                    if (!answer) {
+                        alert('All questions must have answers. Please select an answer for: ' + question);
+                        return;
+                    }
+                    
+                    // Collect links for this answer
+                    const links = [];
+                    const linkItems = item.querySelectorAll('.answer-link-item');
+                    linkItems.forEach(linkItem => {
+                        const label = linkItem.querySelector('.answer-link-label').value.trim();
+                        const url = linkItem.querySelector('.answer-link-url').value.trim();
+                        if (label && url) {
+                            try {
+                                new URL(url);
+                                links.push({ label, url });
+                            } catch (e) {
+                                alert('Invalid URL: ' + url);
+                                return;
+                            }
+                        } else if (label || url) {
+                            alert('Both label and URL are required for answer links.');
+                            return;
+                        }
+                    });
+                    
+                    questions.push({ question, answer, justification, links });
+                }
+            });
+
+            if (questions.length === 0) {
+                if (!confirm('No questions added. Continue without questions?')) {
+                    return;
+                }
+            }
+            
+            controls[index] = {
+                ...controls[index],
+                id: document.getElementById('editControlId').value,
+                name: document.getElementById('editControlName').value,
+                businessUnit: document.getElementById('editControlBusinessUnit').value,
+                category: document.getElementById('editControlCategory').value,
+                description: document.getElementById('editControlDescription').value,
+                owner: document.getElementById('editControlOwner').value,
+                status: document.getElementById('editControlStatus').value,
+                dueDate: document.getElementById('editControlDueDate').value || null,
+                notes: document.getElementById('editControlNotes').value || '',
+                links: links,
+                questions: questions,
+                updatedAt: new Date().toISOString()
+            };
+
+            saveControls();
+            updateCategoryFilter();
+            closeModal('editControlModal');
+            filterControls();
+        }
+
+        // Delete control
+        function deleteControl(index) {
+            if (confirm('Are you sure you want to delete this control?')) {
+                const actualIndex = controls.findIndex(c => c.id === filteredControls[index].id);
+                controls.splice(actualIndex, 1);
+                saveControls();
+                updateCategoryFilter();
+                filterControls();
+            }
+        }
+
+        // Change status
+        function changeStatus(index) {
+            const control = filteredControls[index];
+            const statuses = ['pending', 'in-progress', 'compliant', 'non-compliant'];
+            const currentIndex = statuses.indexOf(control.status);
+            const nextIndex = (currentIndex + 1) % statuses.length;
+            const newStatus = statuses[nextIndex];
+            
+            const actualIndex = controls.findIndex(c => c.id === control.id);
+            controls[actualIndex].status = newStatus;
+            controls[actualIndex].updatedAt = new Date().toISOString();
+            
+            saveControls();
+            filterControls();
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function openAddControlModal() {
+            openModal('addControlModal');
+        }
+
+        // Export data
+        function exportData() {
+            const dataStr = JSON.stringify(controls, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `audit-controls-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+
+        // Clear all controls
+        function clearAllControls() {
+            if (controls.length === 0) {
+                alert('No controls to remove.');
+                return;
+            }
+
+            if (confirm(`Are you sure you want to remove ALL ${controls.length} controls? This action cannot be undone.`)) {
+                controls = [];
+                saveControls();
+                updateCategoryFilter();
+                filterControls();
+                alert('All controls have been removed.');
+            }
+        }
+
+        // Utility functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function expandAll() {
+            // Future: implement expand/collapse functionality
+            alert('Expand all functionality coming soon!');
+        }
+
+        function collapseAll() {
+            // Future: implement expand/collapse functionality
+            alert('Collapse all functionality coming soon!');
+        }
+
+        // Import predefined controls
+        function importPredefinedControls() {
+            if (controls.length > 0 && !confirm('This will REPLACE all existing controls with the new set. Continue?')) {
+                return;
+            }
+
+            // Clear existing controls
+            controls = [];
+
+            // Updated control definitions - unique controls only
+            const controlDefinitions = [
+                { name: "System and Application Configuration", category: "Network Security", businessUnit: "Secure Flow" },
+                { name: "Network Configuration management", category: "Network Security", businessUnit: "Secure Flow" },
+                { name: "Secure Coding", category: "Data Protection", businessUnit: "Secure Flow" },
+                { name: "Change Management", category: "Risk Management", businessUnit: "Secure Flow" },
+                { name: "Access Management", category: "Access Control", businessUnit: "Secure Flow" },
+                { name: "Patch Management", category: "Network Security", businessUnit: "Secure Flow" },
+                { name: "Data Security & Protection", category: "Data Protection", businessUnit: "Secure Flow" },
+                { name: "Encryption", category: "Data Protection", businessUnit: "Secure Flow" },
+                { name: "System & Application Inventory Management", category: "Risk Management", businessUnit: "Secure Flow" },
+                { name: "Software/Code Inventory Management", category: "Risk Management", businessUnit: "Secure Flow" },
+                { name: "Risk Management", category: "Risk Management", businessUnit: "Secure Flow" },
+                { name: "Security Incident Management", category: "Incident Response", businessUnit: "PSIRT" },
+                { name: "Vulnerability Management", category: "Network Security", businessUnit: "PSIRT" },
+                { name: "Integrated Service Management", category: "Business Continuity", businessUnit: "Secure Flow" },
+                { name: "Business Continuity & Disaster Recovery", category: "Business Continuity", businessUnit: "Secure Flow" }
+            ];
+
+            let controlNumber = 1;
+            let addedCount = 0;
+
+            controlDefinitions.forEach(controlDef => {
+                const control = {
+                    id: `CTRL-${String(controlNumber).padStart(3, '0')}`,
+                    name: controlDef.name,
+                    businessUnit: controlDef.businessUnit || "Other",
+                    category: controlDef.category,
+                    description: `${controlDef.name} control requirement. This control ensures compliance with organizational policies and regulatory requirements.`,
+                    owner: "",
+                    status: "pending",
+                    dueDate: null,
+                    notes: "",
+                    links: [],
+                    questions: [],
+                    createdAt: new Date().toISOString()
+                };
+                controls.push(control);
+                controlNumber++;
+                addedCount++;
+            });
+
+            saveControls();
+            updateCategoryFilter();
+            filterControls();
+            alert(`Successfully replaced with ${addedCount} controls!`);
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            loadControls();
+            
+            // Check if controls are empty and offer to import
+            if (controls.length === 0) {
+                if (confirm('Would you like to import the predefined compliance controls?')) {
+                    importPredefinedControls();
+                } else {
+                    filterControls();
+                }
+            } else {
+                filterControls();
+            }
+        });
+    </script>
+</body>
+</html>
+
